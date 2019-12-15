@@ -81,6 +81,23 @@ fn test_collect() {
 }
 
 #[test]
+fn test_collect_with_error_conversion() {
+    #[derive(PartialEq)]
+    enum CustomErr<T: Eq + PartialEq> {
+        Sub(T),
+    }
+    impl<E: Eq + PartialEq> From<E> for CustomErr<E> {
+        fn from(e: E) -> CustomErr<E> {
+            Self::Sub(e)
+        }
+    }
+
+    let v: Result<Vec<isize>, CustomErr<isize>> =
+        (0..3).map(|x| if x > 1 { Err(x) } else { Ok(x) }).collect();
+    assert!(v == Err(CustomErr::Sub(2)));
+}
+
+#[test]
 fn test_fmt_default() {
     let ok: Result<isize, &'static str> = Ok(100);
     let err: Result<isize, &'static str> = Err("Err");
