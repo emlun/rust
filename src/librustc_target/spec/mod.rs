@@ -1103,9 +1103,9 @@ impl Target {
                             format!("{}.{}: expected a JSON array", name, k)
                         )?.iter().enumerate()
                             .map(|(i,s)| {
-                                let s = s.as_string().ok_or_else(||
-                                    format!("{}.{}[{}]: expected a JSON string", name, k, i))?;
-                                Ok(s.to_owned())
+                                s.as_string().ok_or_else(||
+                                    format!("{}.{}[{}]: expected a JSON string", name, k, i))
+                                    .map(|s| s.to_owned())
                             })
                             .collect::<Result<Vec<_>, String>>()?;
 

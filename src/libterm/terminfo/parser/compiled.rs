@@ -255,7 +255,7 @@ pub fn parse(file: &mut dyn io::Read, longnames: bool) -> Result<TermInfo, Strin
             Err(e) => Some(Err(e)),
             Ok(1) => Some(Ok((bnames[i].to_string(), true))),
             Ok(_) => None
-        }).collect()
+        }).collect::<Result<_, std::io::Error>>()
     };
 
     if (bools_bytes + names_bytes) % 2 == 1 {
@@ -267,13 +267,13 @@ pub fn parse(file: &mut dyn io::Read, longnames: bool) -> Result<TermInfo, Strin
             Ok(0xFFFF) => None,
             Ok(n) => Some(Ok((nnames[i].to_string(), n))),
             Err(e) => Some(Err(e))
-        }).collect()
+        }).collect::<Result<_, std::io::Error>>()
     };
 
     let string_map: HashMap<String, Vec<u8>> = if string_offsets_count > 0 {
         let string_offsets: Vec<u16> = t!((0..string_offsets_count)
                                                 .map(|_| read_le_u16(file))
-                                                .collect());
+                                                .collect::<Result<_, std::io::Error>>());
 
         let mut string_table = Vec::new();
         t!(file.take(string_table_bytes as u64).read_to_end(&mut string_table));
@@ -302,7 +302,7 @@ pub fn parse(file: &mut dyn io::Read, longnames: bool) -> Result<TermInfo, Strin
                 Some(len) => Ok((name.to_string(), string_table[offset..offset + len].to_vec())),
                 None => Err("invalid file: missing NUL in string_table".to_string()),
             }
-        }).collect())
+        }).collect::<Result<_, String>>())
     } else {
         HashMap::new()
     };

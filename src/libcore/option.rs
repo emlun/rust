@@ -1554,7 +1554,7 @@ impl<A, V: FromIterator<A>> FromIterator<Option<A>> for Option<V> {
         // FIXME(#11084): This could be replaced with Iterator::scan when this
         // performance bug is closed.
 
-        iter.into_iter().map(|x| x.ok_or(())).collect::<Result<_, _>>().ok()
+        iter.into_iter().map(|x| x.ok_or(())).collect::<Result<_, ()>>().ok()
     }
 }
 

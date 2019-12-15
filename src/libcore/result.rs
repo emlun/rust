@@ -1399,7 +1399,7 @@ unsafe impl<A> TrustedLen for IntoIter<A> {}
 /////////////////////////////////////////////////////////////////////////////
 
 #[stable(feature = "rust1", since = "1.0.0")]
-impl<A, E, V: FromIterator<A>> FromIterator<Result<A, E>> for Result<V, E> {
+impl<A, E1, E2: From<E1>, V: FromIterator<A>> FromIterator<Result<A, E1>> for Result<V, E2> {
     /// Takes each element in the `Iterator`: if it is an `Err`, no further
     /// elements are taken, and the `Err` is returned. Should no `Err` occur, a
     /// container with the values of each `Result` is returned.
@@ -1443,11 +1443,11 @@ impl<A, E, V: FromIterator<A>> FromIterator<Result<A, E>> for Result<V, E> {
     /// Since the third element caused an underflow, no further elements were taken,
     /// so the final value of `shared` is 6 (= `3 + 2 + 1`), not 16.
     #[inline]
-    fn from_iter<I: IntoIterator<Item=Result<A, E>>>(iter: I) -> Result<V, E> {
+    fn from_iter<I: IntoIterator<Item = Result<A, E1>>>(iter: I) -> Result<V, E2> {
         // FIXME(#11084): This could be replaced with Iterator::scan when this
         // performance bug is closed.
 
-        iter::process_results(iter.into_iter(), |i| i.collect())
+        iter::process_results(iter.into_iter().map(|r| r.map_err(|e| e.into())), |i| i.collect())
     }
 }
 

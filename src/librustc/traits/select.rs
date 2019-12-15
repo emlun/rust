@@ -1475,7 +1475,7 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
                 Err(OverflowError) => Err(Overflow),
             })
             .flat_map(Result::transpose)
-            .collect::<Result<Vec<_>, _>>()?;
+            .collect::<Result<Vec<_>, SelectionError<'_>>>()?;
 
         debug!(
             "winnowed to {} candidates for {:?}: {:?}",
